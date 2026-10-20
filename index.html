@@ -690,11 +690,6 @@ var NAN_END_MAP = { "了": "矣", "嗎": "無" };
     { id: "s2tw", label: "簡→臺灣繁", from: "cn", to: "tw", src: "s", fromL: "簡體", toL: "臺灣繁體", q: "tw" },
     { id: "nan", label: "中文→台語（台語漢字）", nan: true, src: "any", fromL: "中文", toL: "台語", q: "tw" }
   ];
-  var SAMPLES = {
-    s: "这个软件需要更多内存,请先下载鼠标驱动程序.\n周末想看视频(要先登录帐号)!",
-    t: "這個軟體需要更多記憶體,請先下載滑鼠驅動程式.\n週末想看影片(要先登入帳號)!",
-    any: "我們明天早上一起去吃飯,好嗎?\n你不知道什麼時候要回家嗎?"
-  };
 
   /* ---------- conversion ---------- */
   function getConv(from, to) {
@@ -820,7 +815,6 @@ var NAN_END_MAP = { "了": "矣", "嗎": "無" };
     outEl.lang = toS ? "zh-Hans" : "zh-Hant";
     inEl.style.fontFamily = m.src === "s" ? "var(--font-sc)" : "";
     outEl.classList.toggle("tc", !toS);
-    if (!edited) inEl.value = SAMPLES[m.src];
     setKind(m.nan ? "nan" : "sc");
     render();
   }
@@ -883,6 +877,10 @@ var NAN_END_MAP = { "了": "矣", "嗎": "無" };
     } catch (e) { rowsSc = rowsSc || []; rowsNan = rowsNan || []; }
   }
 
+  /* ---------- 記住上次輸入的內容 ---------- */
+  function saveInput() { try { localStorage.setItem("tc2sc-last", inEl.value); } catch (e) {} }
+  function loadInput() { try { inEl.value = localStorage.getItem("tc2sc-last") || ""; } catch (e) {} }
+
   /* ---------- tabs ---------- */
   function showTab(name) {
     var conv = name === "conv";
@@ -911,8 +909,8 @@ var NAN_END_MAP = { "了": "矣", "嗎": "無" };
     try { localStorage.setItem("tc2sc-punct", this.checked ? "1" : "0"); } catch (e) {}
     render();
   });
-  inEl.addEventListener("input", function () { edited = true; render(); });
-  $("clear").addEventListener("click", function () { edited = true; inEl.value = ""; render(); inEl.focus(); });
+  inEl.addEventListener("input", function () { saveInput(); render(); });
+  $("clear").addEventListener("click", function () { inEl.value = ""; saveInput(); render(); inEl.focus(); });
   $("add").addEventListener("click", function () {
     arr().push({ s: "", t: "" }); renderRows();
     var inputs = $("rows").querySelectorAll("input");
@@ -971,7 +969,7 @@ var NAN_END_MAP = { "了": "矣", "嗎": "無" };
 
   /* ---------- start ---------- */
   try { if (localStorage.getItem("tc2sc-punct") === "0") $("punct").checked = false; } catch (e) {}
-  loadRows(); fit(); setMode("s2t-p");
+  loadRows(); loadInput(); fit(); setMode("s2t-p");
 })();
 </script>
 <script>if("serviceWorker" in navigator&&/^https?:/.test(location.protocol)){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
